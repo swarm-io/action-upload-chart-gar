@@ -1,6 +1,14 @@
 name: 'Upload Released Helm Chart to GAR'
 description: 'Extracts a helm chart from a release and uploads it to GAR. This is designed to be run on a release trigger.'
 inputs:
+  token:
+    description: 'Github token to use'
+    required: false
+    default: ${{ github.token }}
+  tag:
+    description: 'Release tag to fetch chart from'
+    required: false
+    default: ${{ github.event.release.tag_name }}
   credentials-json:
     description: 'gcloud service account credentials json'
     required: true
@@ -30,9 +38,9 @@ runs:
       uses: robinraju/release-downloader@v1.3
       with:
         repository: ${{ github.repository }}
-        tag: ${{ github.event.release.tag_name }}
+        tag: ${{ inputs.tag }}
         fileName: ${{ inputs.release-asset-name }}
-        token: ${{ github.token }}
+        token: ${{ inputs.token }}
     - id: auth
       uses: google-github-actions/auth@v0
       with:
