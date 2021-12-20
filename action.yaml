@@ -1,10 +1,24 @@
-name: 'Hello World' # taken from https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
-description: 'Greet someone'
+name: 'Upload Released Helm Chart to GAR'
+description: 'Extracts a helm chart from a release and uploads it to GAR. This is designed to be run on a release trigger.'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  credentials-json:
+    description: 'gcloud service account credentials json'
     required: true
-    default: 'World'
+  project-id:
+    description: 'gcloud project id'
+    required: true
+  region:
+    description: 'artifact registry region'
+    required: false
+    default: 'us-west1'
+  repository:
+    description: 'artifact registry repository'
+    required: false
+    default: 'charts'
+  release-asset-name:
+    description: 'the asset name containing the chart, must be a tar file'
+    required: false
+    default: 'chart.tgz'
 outputs:
   random-number:
     description: "Random number"
@@ -12,10 +26,41 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - run: echo Hello ${{ inputs.who-to-greet }}.
+    - name: Fetch release
+      uses: robinraju/release-downloader@v1.3
+      with:
+        repository: ${{ github.repository }}
+        tag: ${{ github.event.release.tag_name }}
+        fileName: ${{ inputs.release-asset-name }}
+        token: ${{ github.token }}
+    - id: auth
+      uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ inputs.credentials-json }}
+    - name: Setup gcloud
+      uses: google-github-actions/setup-gcloud@v0.3.0
+      with:
+        project_id: ${{ inputs.project-id }}
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.7.2
+    - id: repo-urls
       shell: bash
-    - id: random-number-generator
-      run: echo "::set-output name=random-id::$(echo $RANDOM)"
+      run: |
+        baseUrl="${{ inputs.region }}-docker.pkg.dev"
+        fullUrl="$baseUrl/${{ inputs.project-id }}/${{ inputs.repository }}"
+        echo "baseUrl is: $baseUrl"
+        echo "fullUrl is: $fullUrl"
+        echo "::set-output name=baseUrl::$baseUrl"
+        echo "::set-output name=fullUrl::$fullUrl"
+    - name: Push chart
+      env:
+        HELM_EXPERIMENTAL_OCI: 1
       shell: bash
-    - run: ${{ github.action_path }}/goodbye.sh
-      shell: bash
+      run: |
+        tar -zxvf ${{ inputs.release-asset-name }} && rm ${{ inputs.release-asset-name }}
+        packagepath=$(ls | grep *.tgz)
+        echo "pushing package $packagepath to ${{ steps.repo-urls.outputs.fullUrl }}"
+        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://${{ steps.repo-urls.outputs.baseUrl }}
+        helm push $packagepath oci://${{ steps.repo-urls.outputs.fullUrl }}
