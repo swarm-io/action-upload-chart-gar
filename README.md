@@ -11,22 +11,22 @@
 <!-- start outputs -->
 <!-- end outputs -->
 <!-- start examples -->
-### Example usage
+### Example usage to upload chart on release
 ```yaml
-on: [push]
-
+name: Upload Released Chart
+on:
+  release:
+    types:
+      - published
 jobs:
-  hello_world_job:
+  upload-chart-gar:
     runs-on: ubuntu-latest
-    name: A job to say hello
     steps:
-      - uses: actions/checkout@v2
-      - id: foo
-        uses: actions/hello-world-composite-action@v1
+      - name: Push Chart
+        uses: swarm-io/action-upload-chart-gar@v1
         with:
-          who-to-greet: 'Mona the Octocat'
-      - run: echo random-number ${{ steps.foo.outputs.random-number }}
-        shell: bash
+          credentials-json: ${{ secrets.GAR_WRITE_SERVICE_ACCOUNT_KEY }}
+          project-id: ${{ secrets.GCLOUD_PROJECT_ID_PROD }}
 ```
 <!-- end examples -->
 <!-- start [.github/ghdocs/examples/] -->
