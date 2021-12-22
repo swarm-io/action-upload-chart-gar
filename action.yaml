@@ -74,9 +74,10 @@ runs:
         name=${packagepath%-[0-9]*}
         fullRepoUrl=${{ steps.repo-urls.outputs.fullUrl }}/$name
         newTag=$fullRepoUrl:$version
-        latestTag=$fullRepoUrl:latest
-        echo "will tag $newTag as $latestTag"
+        if echo $version | grep -q alpha; then additionalTag="alpha"; else additionalTag="main"; fi
+        addedTag=$fullRepoUrl:$additionalTag
+        echo "will tag $newTag as $addedTag"
         echo "pushing package $packagepath to ${{ steps.repo-urls.outputs.fullUrl }}"
         gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://${{ steps.repo-urls.outputs.baseUrl }}
         helm push $packagepath oci://${{ steps.repo-urls.outputs.fullUrl }}
-        gcloud artifacts docker tags add $newTag $latestTag
+        gcloud artifacts docker tags add $newTag $addedTag
