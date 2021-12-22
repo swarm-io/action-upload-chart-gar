@@ -74,7 +74,7 @@ runs:
         name=${packagepath%-[0-9]*}
         fullRepoUrl=${{ steps.repo-urls.outputs.fullUrl }}/$name
         newTag=$fullRepoUrl:$version
-        latestTag=fullRepoUrl:latest
+        latestTag=$fullRepoUrl:latest
         echo "will tag $newTag as $latestTag"
         echo "pushing package $packagepath to ${{ steps.repo-urls.outputs.fullUrl }}"
         gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://${{ steps.repo-urls.outputs.baseUrl }}
