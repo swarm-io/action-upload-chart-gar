@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/swarm-io/action-upload-chart-gar/compare/v1.0.1...v1.0.2) (2021-12-22)
+
+
+### Bug Fixes
+
+* Tag new tag as latest ([#3](https://github.com/swarm-io/action-upload-chart-gar/issues/3)) ([f9a8028](https://github.com/swarm-io/action-upload-chart-gar/commit/f9a8028a6e9e17c349f555df8f575059f51126e8))
+
 ## [1.0.1](https://github.com/swarm-io/action-upload-chart-gar/compare/v1.0.0...v1.0.1) (2021-12-22)
 
 
