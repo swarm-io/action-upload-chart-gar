@@ -69,10 +69,14 @@ runs:
       run: |
         tar -zxvf ${{ inputs.release-asset-name }} && rm ${{ inputs.release-asset-name }}
         packagepath=$(ls | grep *.tgz)
-        latest=${packagepath%-[0-9]*}-latest
-        cp $packagepath $latest
-        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://${{ steps.repo-urls.outputs.baseUrl }}
+        version="${{ github.event.release.tag_name }}"
+        version="${version:1}"
+        name=${packagepath%-[0-9]*}
+        fullRepoUrl=${{ steps.repo-urls.outputs.fullUrl }}/$name
+        newTag=$fullRepoUrl:$version
+        latestTag=fullRepoUrl:latest
+        echo "will tag $newTag as $latestTag"
         echo "pushing package $packagepath to ${{ steps.repo-urls.outputs.fullUrl }}"
+        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://${{ steps.repo-urls.outputs.baseUrl }}
         helm push $packagepath oci://${{ steps.repo-urls.outputs.fullUrl }}
-        echo "pushing package $latest to ${{ steps.repo-urls.outputs.fullUrl }}"
-        helm push $latest oci://${{ steps.repo-urls.outputs.fullUrl }}
+        gcloud artifacts docker tags add $newTag $latestTag
