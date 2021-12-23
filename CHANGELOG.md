@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/swarm-io/action-upload-chart-gar/compare/v1.0.4...v1.0.5) (2021-12-23)
+
+
+### Bug Fixes
+
+* tag stable instead of main ([#6](https://github.com/swarm-io/action-upload-chart-gar/issues/6)) ([93c0fad](https://github.com/swarm-io/action-upload-chart-gar/commit/93c0fad81272df2222f7fc83fadd3d4da2550cbd))
+
 ## [1.0.4](https://github.com/swarm-io/action-upload-chart-gar/compare/v1.0.3...v1.0.4) (2021-12-22)
 
 
