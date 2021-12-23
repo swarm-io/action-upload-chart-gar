@@ -74,7 +74,7 @@ runs:
         name=${packagepath%-[0-9]*}
         fullRepoUrl=${{ steps.repo-urls.outputs.fullUrl }}/$name
         newTag=$fullRepoUrl:$version
-        if echo $version | grep -q alpha; then additionalTag="alpha"; else additionalTag="main"; fi
+        if echo $version | grep -q alpha; then additionalTag="alpha"; else additionalTag="stable"; fi
         addedTag=$fullRepoUrl:$additionalTag
         echo "will tag $newTag as $addedTag"
         echo "pushing package $packagepath to ${{ steps.repo-urls.outputs.fullUrl }}"
